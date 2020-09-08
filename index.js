@@ -1,16 +1,15 @@
 var fs = require('fs'),
   xml2js = require('xml2js');
 
-const {argv} = require('yargs')
+const { argv } = require('yargs')
 
-var pathString = "M";
-var elePathString = "M"
-
+// final image size - doesn't really matter as svg is vectorial image and can be scaled indefinetely
 var settings = {
   xWidth: 2710000.0,
   yWidth: 2320000.0,
 }
 
+// these formulas map latitude and longitude to an X,Y system 
 var mappedLatitude = function (lat) {
   return ((180 - (lat + 90)) / 180) * settings.yWidth;
 };
@@ -21,13 +20,20 @@ var mappedLongitude = function (lon) {
     return ((lon / 360) * settings.xWidth);
 };
 
-var parser = new xml2js.Parser();
-
-if(!argv.gpx) {
+// check if script has argument or exit program
+if (!argv.gpx) {
   console.log("Pass a gpx file as argument. ie yarn convert --gpx=sample_gpx/workout.gpx");
   return;
 }
 
+// initialise GPX parser (a GPX file is a XML file)
+var parser = new xml2js.Parser();
+
+// all PATH SVG strings starts with M
+var pathString = "M";
+var elePathString = "M"
+
+// read and parse GPX file
 fs.readFile(__dirname + "/" + argv.gpx, function (err, data) {
   parser.parseString(data, function (err, result) {
 
@@ -87,13 +93,13 @@ fs.readFile(__dirname + "/" + argv.gpx, function (err, data) {
 
     elePathString += "l" + 0 + "," + currentEle
 
-    //generate elevation
-
-    //console.log(pathString)   
-    // need to remove half stroke width on x,y -2
-    // need to add double stroke width on widht,height 4
+    // generate track    
+    // need to remove half stroke width on x,y -2 or half the path stroke will get cropped
+    // need to add double stroke width on widht,height 4 or half the path stroke will get cropped
     generateMapSVG(pathString, x - 2, y - 2, width + 4, height + 4)
-    generateElevationSVG(elePathString, 0, -eleHeight, track.length/2 , eleHeight)
+
+    // generate elevation
+    generateElevationSVG(elePathString, 0, -eleHeight, track.length / 2, eleHeight)
   });
 });
 
@@ -125,6 +131,7 @@ function generateElevationSVG(path, x, y, width, height) {
   var builder = new xml2js.Builder();
   var xml = builder.buildObject(obj);
 
+  // write to file
   fs.writeFile('output/elevation.svg', xml, function (err) {
     if (err) return console.log(err);
   });
@@ -158,6 +165,7 @@ function generateMapSVG(path, x, y, width, height) {
   var builder = new xml2js.Builder();
   var xml = builder.buildObject(obj);
 
+  // write to file
   fs.writeFile('output/track.svg', xml, function (err) {
     if (err) return console.log(err);
   });
