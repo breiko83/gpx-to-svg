@@ -134,7 +134,7 @@ function generateMapSVG(path, x, y, width, height) {
   let obj = {
     svg: {
       $: {
-        "id": "map",
+        "id": "track",
         "viewBox": y + " " + x + " " + height + " " + width,
         "xmlns": "http://www.w3.org/2000/svg",
         "xmlns:xlink": "http://www.w3.org/1999/xlink",
@@ -158,7 +158,7 @@ function generateMapSVG(path, x, y, width, height) {
   var builder = new xml2js.Builder();
   var xml = builder.buildObject(obj);
 
-  fs.writeFile('output/map.svg', xml, function (err) {
+  fs.writeFile('output/track.svg', xml, function (err) {
     if (err) return console.log(err);
   });
 }
